@@ -2,10 +2,9 @@ import { type  FC } from 'react';
 import { Breadcrumb } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-// Интерфейс одной "крошки"
 export interface Crumb {
     label: string;
-    path?: string; // Если path нет, значит это последняя (активная) крошка
+    path?: string;
 }
 
 interface Props {

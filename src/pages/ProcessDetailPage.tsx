@@ -7,7 +7,7 @@ import type { ChemicalProcess } from '../types';
 const DEFAULT_IMAGE = '/default.png';
 
 export const ProcessDetailPage: FC = () => {
-    const { id } = useParams(); // Получаем :id из роута
+    const { id } = useParams();
     const [process, setProcess] = useState<ChemicalProcess | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

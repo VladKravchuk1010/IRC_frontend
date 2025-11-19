@@ -1,5 +1,5 @@
 import { type FC } from 'react';
-import { Container, Button, Card } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 export const HomePage: FC = () => {
