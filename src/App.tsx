@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type FC } from 'react';
 // Импортируем useLocation для проверки текущего пути
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'; 
+import { Routes, Route, Link, useLocation } from 'react-router-dom'; 
 import { Navbar, Nav, Container, Badge } from 'react-bootstrap'; 
 
 // !!! ВАЖНО: Убедитесь, что ваши файлы страниц импортированы правильно !!!
@@ -108,9 +108,7 @@ function AppContent() {
 // Это стандартный паттерн для работы с useLocation.
 const App: FC = () => (
     <Provider store={store}>
-        <BrowserRouter>
-            <AppContent /> 
-        </BrowserRouter>
+        <AppContent /> 
     </Provider>
 );
 
