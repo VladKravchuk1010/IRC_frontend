@@ -10,7 +10,8 @@ import { HomePage } from './pages/HomePage';
 import { ProcessListPage } from './pages/ProcessListPage';
 import { ProcessDetailPage } from './pages/ProcessDetailPage';
 // ---------------------------------------------------------------------
-
+import { Provider } from 'react-redux';
+import { store } from './store/store';
 
 // --- Логика запроса корзины (для повторного использования) ---
 const fetchCartCount = async (setCartCount: (count: number) => void) => {
@@ -106,9 +107,11 @@ function AppContent() {
 // --- Корневой компонент для обертывания в BrowserRouter ---
 // Это стандартный паттерн для работы с useLocation.
 const App: FC = () => (
-    <BrowserRouter>
-        <AppContent />
-    </BrowserRouter>
+    <Provider store={store}>
+        <BrowserRouter>
+            <AppContent /> 
+        </BrowserRouter>
+    </Provider>
 );
 
 export default App;

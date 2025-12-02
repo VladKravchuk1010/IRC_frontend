@@ -1,3 +1,9 @@
+export interface FilterState {
+    search: string;
+    minMass: string;
+    maxMass: string;
+}
+
 export interface ChemicalProcess {
     id: number;
     name: string;
