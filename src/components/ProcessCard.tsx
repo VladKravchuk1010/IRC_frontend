@@ -17,7 +17,7 @@ export const ProcessCard: FC<Props> = ({ process, apiBaseUrl, defaultImagePath }
     if (process.image && process.image.length > 0) {
         const path = process.image;
 
-        if (path.startsWith('http')) {
+        if (path.startsWith('https')) {
             // АБСОЛЮТНЫЙ ПУТЬ (как в ProcessDetailPage)
             sourceUrl = path;
         } else { 
