@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     mkcert()
   ],
-  base: '/WEB_54B_2025_frontend/',
+  base: './',
   server: {
     host: '0.0.0.0',
     port: 3000,
@@ -18,6 +18,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,      
       },
+      // '/images': {
+      //   target:'http://172.20.10.3:9000',
+      //   changeOrigin: true,
+      //   secure: false,      
+      // }
     },
     headers: {
       'Access-Control-Allow-Origin': '*',

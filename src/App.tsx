@@ -13,11 +13,13 @@ import { ProcessDetailPage } from './pages/ProcessDetailPage';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 
+const API_BASE_URL = 'https://172.20.10.3:3000'; 
+
 // --- Логика запроса корзины (для повторного использования) ---
 const fetchCartCount = async (setCartCount: (count: number) => void) => {
     try {
         // Эндпоинт, который мы нашли в api_urls.py
-        const response = await fetch('/api/reagent_calculations/cart-icon/'); 
+        const response = await fetch(API_BASE_URL + '/api/reagent_calculations/cart-icon/'); 
         
         if (response.ok) {
             const data = await response.json();

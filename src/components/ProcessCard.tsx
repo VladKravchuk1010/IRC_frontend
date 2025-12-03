@@ -14,18 +14,18 @@ export const ProcessCard: FC<Props> = ({ process, apiBaseUrl, defaultImagePath }
     let sourceUrl: string | null = null; 
 
     // 1. ПОСТРОЕНИЕ ПУТИ: Только если поле image заполнено (т.е. это не MOCK-данные)
-    if (process.image && process.image.length > 0) {
-        const path = process.image;
+    // if (process.image && process.image.length > 0) {
+         const path = process.image;
 
-        if (path.startsWith('https')) {
-            // АБСОЛЮТНЫЙ ПУТЬ (как в ProcessDetailPage)
-            sourceUrl = path;
-        } else { 
-            // ОТНОСИТЕЛЬНЫЙ ПУТЬ (как в ProcessListPage)
-            const cleanedPath = path.startsWith('/') ? path : '/' + path;
-            sourceUrl = `${apiBaseUrl}${cleanedPath}`; // Собираем полный URL
-        }
-    }
+    //     if (path.startsWith('https')) {
+    //         // АБСОЛЮТНЫЙ ПУТЬ (как в ProcessDetailPage)
+             sourceUrl = path;
+    //     } else { 
+    //         // ОТНОСИТЕЛЬНЫЙ ПУТЬ (как в ProcessListPage)
+    //         const cleanedPath = path.startsWith('/') ? path : '/' + path;
+    //         sourceUrl = `${apiBaseUrl}${cleanedPath}`; // Собираем полный URL
+    //     }
+    // }
     
     // 2. УСЛОВНЫЙ РЕНДЕРИНГ: Не рендерим Card.Img, если это MOCK (sourceUrl == null)
     const shouldRenderImage = !!sourceUrl;
@@ -40,7 +40,7 @@ export const ProcessCard: FC<Props> = ({ process, apiBaseUrl, defaultImagePath }
                     style={{ height: '200px', objectFit: 'cover' }} 
                     // 3. FALLBACK: Если даже абсолютный URL не сработал (404), показываем заглушку
                     onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => { 
-                        e.currentTarget.src = defaultImagePath; 
+                        e.currentTarget.src = apiBaseUrl + defaultImagePath; 
                     }}
                 />
             )}

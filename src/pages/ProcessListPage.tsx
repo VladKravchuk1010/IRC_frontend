@@ -45,7 +45,7 @@ export const ProcessListPage: FC = () => {
         if (minMass) params.append('min_mass', String(parseFloat(minMass))); 
         if (maxMass) params.append('max_mass', String(parseFloat(maxMass)));
 
-        const url = `/api/chemical-processes/${'?' + params.toString()}`;
+        const url = API_BASE_URL + `/api/chemical-processes/${'?' + params.toString()}`;
         
         try {
             const response = await fetch(url);
