@@ -14,7 +14,7 @@ import { setFilters } from '../store/filterSlice';
 import type { ChemicalProcess, FilterState } from '../types'; 
 // -----------------------------
 
-const API_BASE_URL = 'http://localhost:8000'; 
+const API_BASE_URL = 'http://172.20.10.3:8000'; 
 const DEFAULT_FALLBACK_PATH = '/default.png';
 
 
