@@ -5,7 +5,6 @@ import { useState, useEffect, type FC } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom'; 
 import { Navbar, Nav, Container, Badge } from 'react-bootstrap'; 
 
-// !!! ВАЖНО: Убедитесь, что ваши файлы страниц импортированы правильно !!!
 import { HomePage } from './pages/HomePage';
 import { ProcessListPage } from './pages/ProcessListPage';
 import { ProcessDetailPage } from './pages/ProcessDetailPage';
@@ -13,7 +12,7 @@ import { ProcessDetailPage } from './pages/ProcessDetailPage';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 
-const API_BASE_URL = 'https://172.20.10.3:3000'; 
+const API_BASE_URL = 'https://172.25.192.1:3000'; 
 
 // --- Логика запроса корзины (для повторного использования) ---
 const fetchCartCount = async (setCartCount: (count: number) => void) => {
@@ -106,8 +105,6 @@ function AppContent() {
     );
 }
 
-// --- Корневой компонент для обертывания в BrowserRouter ---
-// Это стандартный паттерн для работы с useLocation.
 const App: FC = () => (
     <Provider store={store}>
         <AppContent /> 

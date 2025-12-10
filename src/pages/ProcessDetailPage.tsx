@@ -4,7 +4,7 @@ import { Container, Row, Col, Image, Spinner, Alert, Table } from 'react-bootstr
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import type { ChemicalProcess } from '../types';
 
-const API_BASE_URL = 'https://172.20.10.3:3000';
+const API_BASE_URL = 'https://172.25.192.1:3000';
 const DEFAULT_IMAGE = API_BASE_URL + '/default.png';
 
 export const ProcessDetailPage: FC = () => {
