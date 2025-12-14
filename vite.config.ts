@@ -1,18 +1,23 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { api_proxy_addr, img_proxy_addr, dest_root } from "./src/target_config"; // ❌ ДОБАВЛЕНО
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  base: '/WEB_54B_2025_frontend/',
+  plugins: [
+    react(),
+  ],
+  base: dest_root,
   server: {
-    port: 5173,
+    port: 3000,
     proxy: {
-      '/api': {
-        target: 'http://172.20.10.3:8000',
+      "/api": {
+        target: api_proxy_addr,
         changeOrigin: true,
-        secure: false,      
+      },
+      "/images": {
+        target: img_proxy_addr,
+        changeOrigin: true,
       },
     },
   },
-})
+});

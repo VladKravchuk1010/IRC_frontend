@@ -13,15 +13,12 @@ export const ProcessCard: FC<Props> = ({ process, apiBaseUrl, defaultImagePath }
         
     let sourceUrl: string | null = null; 
 
-    // 1. ПОСТРОЕНИЕ ПУТИ: Только если поле image заполнено (т.е. это не MOCK-данные)
     if (process.image && process.image.length > 0) {
         const path = process.image;
 
         if (path.startsWith('http')) {
-            // АБСОЛЮТНЫЙ ПУТЬ (как в ProcessDetailPage)
             sourceUrl = path;
         } else { 
-            // ОТНОСИТЕЛЬНЫЙ ПУТЬ (как в ProcessListPage)
             const cleanedPath = path.startsWith('/') ? path : '/' + path;
             sourceUrl = `${apiBaseUrl}${cleanedPath}`; // Собираем полный URL
         }

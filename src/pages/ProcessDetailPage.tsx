@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'; // Хук для получени�
 import { Container, Row, Col, Image, Spinner, Alert, Table } from 'react-bootstrap';
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import type { ChemicalProcess } from '../types';
+import { dest_api, dest_img} from "../target_config"
 
 const DEFAULT_IMAGE = '/default.png';
 
@@ -15,7 +16,7 @@ export const ProcessDetailPage: FC = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`/api/chemical-processes/${id}/`);
+                const response = await fetch(`${dest_api}/api/chemical-processes/${id}/`);
                 if (!response.ok) throw new Error('Процесс не найден');
                 const data = await response.json();
                 setProcess(data);
@@ -33,7 +34,6 @@ export const ProcessDetailPage: FC = () => {
 
     return (
         <Container fluid className="mt-4">
-            {/* Хлебные крошки: Главная -> Список -> Название процесса */}
             <BreadCrumbs crumbs={[
                 { label: 'Список услуг', path: '/processes' },
                 { label: process.name } 
@@ -41,7 +41,7 @@ export const ProcessDetailPage: FC = () => {
 
             <Row>
                 <Col md={5}>
-                    <Image src={process.image || DEFAULT_IMAGE} fluid rounded className="shadow-sm" />
+                    <Image src={`${process.image}` || DEFAULT_IMAGE} fluid rounded style={{ height: '600px', objectFit: 'contain' }} />
                 </Col>
                 <Col md={7}>
                     <h2>{process.name}</h2>

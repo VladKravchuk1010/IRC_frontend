@@ -3,34 +3,33 @@ import { Container, Row, Col, Form, Button, Alert, Spinner } from 'react-bootstr
 import { MOCK_PROCESSES } from '../api/mock';
 import { ProcessCard } from '../components/ProcessCard';
 
-
-// --- Redux Toolkit Imports ---
 import { useSelector, useDispatch } from 'react-redux';
-// Исправлено: RootState и AppDispatch импортируются напрямую из store
 import type { RootState, AppDispatch } from '../store/store'; 
 import { setFilters } from '../store/filterSlice'; 
+import type { ChemicalProcess, FilterState } from '../types';
+import { dest_api } from "../target_config" 
 
-// --- Импорт общих типов ---
-import type { ChemicalProcess, FilterState } from '../types'; 
-// -----------------------------
-
-const API_BASE_URL = 'http://172.20.10.3:8000'; 
 const DEFAULT_FALLBACK_PATH = '/default.png';
 
+const HEADER_COLORS = ['black', 'red', 'blue'];
+const HEADER_COLOR_INDEX = 0;
 
 export const ProcessListPage: FC = () => {
     
-    // --- Использование Redux ---
-    // Исправлено: Явно указываем AppDispatch
     const dispatch: AppDispatch = useDispatch(); 
-    // Исправлено: Явно указываем тип RootState в useSelector
     const { search, minMass, maxMass } = useSelector((state: RootState) => state.filter);
     
-    // --- Локальные состояния с явной типизацией ---
     const [processes, setProcesses] = useState<ChemicalProcess[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isMock, setIsMock] = useState<boolean>(false);
+
+    //для допки
+    const [colorIndex, setColorIndex] = useState<number>(HEADER_COLOR_INDEX);
+
+    const cycleColor = () => {
+        setColorIndex((prevIndex) => (prevIndex + 1) % HEADER_COLORS.length);
+    };
 
 
     // --- Функция для получения данных ---
@@ -45,7 +44,7 @@ export const ProcessListPage: FC = () => {
         if (minMass) params.append('min_mass', String(parseFloat(minMass))); 
         if (maxMass) params.append('max_mass', String(parseFloat(maxMass)));
 
-        const url = `/api/chemical-processes/${'?' + params.toString()}`;
+        const url = dest_api + `/api/chemical-processes/${'?' + params.toString()}`;
         
         try {
             const response = await fetch(url);
@@ -102,7 +101,18 @@ export const ProcessListPage: FC = () => {
 
     return (
         <Container fluid className="mt-4">
-            <h1>Химические процессы</h1>
+            <div className="d-flex align-items-center mb-3">
+                <h1 style={{ color: HEADER_COLORS[colorIndex], transition: 'color 0.3s' }}>
+                    Химические процессы
+                </h1>
+                <Button
+                    variant="secondary"
+                    onClick={cycleColor}
+                    className="ms-3"
+                >
+                    Сменить цвет
+                </Button>
+            </div>
             {isMock && <Alert variant="warning">Приложение работает в режиме Mock-объектов.</Alert>}
             {error && !isMock && <Alert variant="danger">{error}</Alert>}
 
@@ -162,7 +172,7 @@ export const ProcessListPage: FC = () => {
                                 <Col key={process.id}> 
                                     <ProcessCard 
                                         process={process}
-                                        apiBaseUrl={API_BASE_URL}
+                                        apiBaseUrl={dest_api}
                                         defaultImagePath={DEFAULT_FALLBACK_PATH}
                                     />
                                 </Col>
