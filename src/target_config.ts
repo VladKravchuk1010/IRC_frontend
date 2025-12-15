@@ -9,4 +9,4 @@ export const dest_api = (target_tauri) ? api_proxy_addr : "/api";
 
 export const dest_img = (target_tauri) ? img_proxy_addr : "/images";
 
-export const dest_root = (target_tauri) ? "" : "/WEB_54B_2025_frontend"; 
+export const dest_root = (target_tauri) ? "" : "/IRC_frontend"; 
