@@ -8,7 +8,7 @@ import { registerSW } from 'virtual:pwa-register';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename='/WEB_54B_2025_frontend'>
+    <BrowserRouter basename='/IRC_frontend'>
       <App />
     </BrowserRouter>
   </StrictMode>,

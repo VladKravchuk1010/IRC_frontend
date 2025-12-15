@@ -24,12 +24,12 @@ export default defineConfig({
         icons: [
           {
 
-            "src": "/public/icons/icon-192x192.png",
+            "src": "/public/icons/192x192.png",
             "type": "image/png",
             "sizes": "192x192"
           },
           {
-            "src": "/public/icons/icon-512x512.png",
+            "src": "/public/icons/512x512.png",
             "type": "image/png",
             "sizes": "512x512"
           }
@@ -37,7 +37,7 @@ export default defineConfig({
       }
     })
   ],
-  base: '/WEB_54B_2025_frontend',
+  base: '/IRC_frontend',
   server: {
     host: '0.0.0.0',
     port: 3000,
@@ -47,11 +47,6 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/images': {
-        target: 'http://172.25.192.1:9000',
-        changeOrigin: true,
-        secure: false,
-      }
     },
     headers: {
       'Access-Control-Allow-Origin': '*',
