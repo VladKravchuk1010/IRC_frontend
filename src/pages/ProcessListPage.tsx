@@ -1,179 +1,130 @@
-import { type FC, useEffect, useState, useCallback } from 'react';
+import { type FC, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Form, Button, Alert, Spinner } from 'react-bootstrap';
-import { MOCK_PROCESSES } from '../api/mock';
 import { ProcessCard } from '../components/ProcessCard';
 
 
-// --- Redux Toolkit Imports ---
 import { useSelector, useDispatch } from 'react-redux';
-// Исправлено: RootState и AppDispatch импортируются напрямую из store
 import type { RootState, AppDispatch } from '../store/store'; 
-import { setFilters } from '../store/filterSlice'; 
+import { setFilters, getProcessesList } from '../store/filterSlice'; 
 
-// --- Импорт общих типов ---
-import type { ChemicalProcess, FilterState } from '../types'; 
-// -----------------------------
-
-const API_BASE_URL = 'https://172.25.192.1:3000'; 
 const DEFAULT_FALLBACK_PATH = '/default.png';
 
 
 export const ProcessListPage: FC = () => {
     
-    // --- Использование Redux ---
-    // Исправлено: Явно указываем AppDispatch
     const dispatch: AppDispatch = useDispatch(); 
-    // Исправлено: Явно указываем тип RootState в useSelector
-    const { search, minMass, maxMass } = useSelector((state: RootState) => state.filter);
+    const {
+        search,
+        minMass,
+        maxMass,
+        processes,
+        loading
+    } = useSelector((state: RootState) => state.filter);
     
-    // --- Локальные состояния с явной типизацией ---
-    const [processes, setProcesses] = useState<ChemicalProcess[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isMock, setIsMock] = useState<boolean>(false);
+    const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
 
+        const safeNumber = (val: string): number | null => {
+            if (val.trim() === '') return null;
+            const num = Number(val);
+            return isNaN(num) ? null : num;
+        };
 
-    // --- Функция для получения данных ---
-    const fetchData = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        setIsMock(false);
-
-        const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        // Обработка пустой строки, чтобы не отправлять 'min_mass='
-        if (minMass) params.append('min_mass', String(parseFloat(minMass))); 
-        if (maxMass) params.append('max_mass', String(parseFloat(maxMass)));
-
-        const url = API_BASE_URL + `/api/chemical-processes/${'?' + params.toString()}`;
-        
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Ошибка HTTP: ${response.status}`);
-            }
-            const data = await response.json();
-            // Явно указываем тип данных
-            setProcesses((data.results || data) as ChemicalProcess[]); 
-        } catch (e) {
-            console.error("Ошибка при получении данных:", e);
-            setError("Не удалось получить данные с сервера. Использование Mock-объектов.");
-            setIsMock(true);
-            
-            // ИСПРАВЛЕНО: MOCK Fallback с полным набором полей по интерфейсу ChemicalProcess
-            setProcesses(MOCK_PROCESSES);
-        } finally {
-            setLoading(false);
-        }
-    }, [search, minMass, maxMass]); 
-
+        dispatch(setFilters({
+            search: name === 'search' ? value : search,
+            minMass: name === 'minMass' ? safeNumber(value) : minMass,
+            maxMass: name === 'maxMass' ? safeNumber(value) : maxMass,
+            processes: processes,
+            loading: loading
+        }));
+    }, [dispatch, search, minMass, maxMass, processes, loading]);
 
     useEffect(() => {
-        fetchData(); 
-    }, [fetchData]); 
+        dispatch(getProcessesList());
+    }, [dispatch]);
 
-
-    // --- Обработчик изменения полей (обновляет Redux-состояние) ---
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        
-        let newState: FilterState = { search, minMass, maxMass};
-        
-        if (name == 'search') {
-            newState.search = value;
-        }
-
-        if (name === 'minMass') {
-            newState.minMass = value;
-        }
-
-        if (name === 'maxMass') {
-            newState.maxMass = value;
-        }
-        
-        dispatch(setFilters(newState));
-    };
-
-
-    const handleSearch = (e: React.FormEvent) => {
+    const handleSearch = useCallback((e: React.FormEvent) => {
         e.preventDefault();
-        fetchData(); 
-    };
+        dispatch(getProcessesList());
+    }, [dispatch]);
 
     return (
-        <Container fluid className="mt-4">
-            <h1>Химические процессы</h1>
-            {isMock && <Alert variant="warning">Приложение работает в режиме Mock-объектов.</Alert>}
-            {error && !isMock && <Alert variant="danger">{error}</Alert>}
+        <Container className="mt-5">
+            <h1 className="mb-4">Список химических процессов</h1>
 
-            {/* Форма фильтрации */}
-            <Form onSubmit={handleSearch} className="mb-4 p-3 border rounded shadow-sm bg-light">
+            {/* Форма поиска теперь управляется Redux State */}
+            <Form onSubmit={handleSearch} className="mb-5 p-4 border rounded shadow-sm">
                 <Row className="g-3 align-items-end">
-                    
-                    <Col xs={12} md={5}>
+
+                    {/* Поле поиска по названию */}
+                    <Col xs={12} md={4}>
                         <Form.Label>Поиск по названию</Form.Label>
-                        <Form.Control 
-                            type="text" 
+                        <Form.Control
+                            type="text"
+                            placeholder="Например, 'Аммиака'"
                             name="search"
-                            placeholder="Название или описание..."
-                            value={search} 
-                            onChange={handleInputChange} 
+                            value={search}
+                            onChange={handleFilterChange}
                         />
                     </Col>
 
+                    {/* Min Mass */}
                     <Col xs={6} md={3}>
-                        <Form.Label>Мин. масса</Form.Label>
-                        <Form.Control 
-                            type="number" 
+                        <Form.Label>Минимальная масса (кг)</Form.Label>
+                        <Form.Control
+                            type="number"
+                            placeholder="От"
                             name="minMass"
-                            placeholder="Минимальная масса"
-                            value={minMass} 
-                            onChange={handleInputChange}
+                            value={minMass === null ? '' : minMass}
+                            onChange={handleFilterChange}
                         />
                     </Col>
 
+                    {/* Max Mass */}
                     <Col xs={6} md={3}>
-                        <Form.Label>Макс. масса</Form.Label>
-                        <Form.Control 
-                            type="number" 
+                        <Form.Label>Максимальная масса (кг)</Form.Label>
+                        <Form.Control
+                            type="number"
+                            placeholder="До"
                             name="maxMass"
-                            placeholder="Максимальная масса"
-                            value={maxMass} 
-                            onChange={handleInputChange}
+                            value={maxMass === null ? '' : maxMass}
+                            onChange={handleFilterChange}
                         />
                     </Col>
-                    
-                    <Col xs={12} md={1}>
-                        <Button type="submit" variant="primary" className="w-100">
-                            Найти
+
+                    {/* Кнопка поиска */}
+                    <Col xs={12} md={2}>
+                        <Button type="submit" variant="primary" className="w-100" disabled={loading}>
+                            {loading ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : 'Найти'}
                         </Button>
                     </Col>
                 </Row>
             </Form>
-            
-            {loading ? (
-                <div className="text-center mt-5"><Spinner animation="border" role="status" /></div>
+
+            {/* Рендеринг списка (как в методичке) */}
+            {loading && processes.length === 0 ? (
+                <div className="text-center mt-5">
+                    <Spinner animation="border" role="status" />
+                </div>
             ) : (
-                <>
-                    {/* АДАПТИВНАЯ СЕТКА КАРТОЧЕК */}
-                    <Row xs={1} md={2} lg={3} xl={4} className="g-4"> 
-                        {processes.length > 0 ? (
-                            processes.map((process) => (
-                                <Col key={process.id}> 
-                                    <ProcessCard 
-                                        process={process}
-                                        apiBaseUrl={API_BASE_URL}
-                                        defaultImagePath={DEFAULT_FALLBACK_PATH}
-                                    />
-                                </Col>
-                            ))
-                        ) : (
-                            <Col xs={12}>
-                                <Alert variant="info">Услуги не найдены.</Alert>
+                <Row xs={1} md={2} lg={3} xl={4} className="g-4">
+                    {processes.length > 0 ? (
+                        processes.map((process) => (
+                            <Col key={process.id}>
+                                <ProcessCard
+                                    process={process}
+                                    defaultImagePath={DEFAULT_FALLBACK_PATH}
+                                />
                             </Col>
-                        )}
-                    </Row>
-                </>
+                        ))
+                    ) : (
+                        <Col xs={12}>
+                            <Alert variant="info">
+                                К сожалению, пока ничего не найдено :(
+                            </Alert>
+                        </Col>
+                    )}
+                </Row>
             )}
         </Container>
     );

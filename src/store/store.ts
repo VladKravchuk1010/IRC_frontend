@@ -1,11 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit';
 import filterReducer from './filterSlice';
+import userReducer from './userSlice';
+import draftReducer from './draftSlice'
+import cartReducer from './cartSlice'
+import listReducer from './listSlice'
 
 export const store = configureStore({
     reducer: {
-        // Добавляем наш слайс
         filter: filterReducer,
-        // Здесь будут добавляться другие слайсы (например, auth, cart и т.д.)
+        user: userReducer,
+        draft: draftReducer,
+        cart: cartReducer,
+        list: listReducer
     },
 });
 

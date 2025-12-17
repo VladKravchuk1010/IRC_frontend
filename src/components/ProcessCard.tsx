@@ -1,59 +1,98 @@
 import type { FC } from 'react'
-import { Card } from 'react-bootstrap'
-import type { ChemicalProcess } from '../types'
+import { Card, Button, Spinner } from 'react-bootstrap' // Добавляем Button, Spinner
+import type { ChemicalProcess } from '../api/Api'
 import { Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '../store/store';
+import { addProcessToDraft, getDraft } from '../store/draftSlice';
+import { incrementCartCount } from '../store/cartSlice';
+
 
 interface Props {
     process: ChemicalProcess;
-    apiBaseUrl: string;
     defaultImagePath: string;
 }
 
-export const ProcessCard: FC<Props> = ({ process, apiBaseUrl, defaultImagePath }) => {
-        
-    let sourceUrl: string | null = null; 
+export const ProcessCard: FC<Props> = ({ process, defaultImagePath }) => {
 
-    // 1. ПОСТРОЕНИЕ ПУТИ: Только если поле image заполнено (т.е. это не MOCK-данные)
-    // if (process.image && process.image.length > 0) {
-         const path = process.image;
+    let sourceUrl: string | null = null;
 
-    //     if (path.startsWith('https')) {
-    //         // АБСОЛЮТНЫЙ ПУТЬ (как в ProcessDetailPage)
-             sourceUrl = path;
-    //     } else { 
-    //         // ОТНОСИТЕЛЬНЫЙ ПУТЬ (как в ProcessListPage)
-    //         const cleanedPath = path.startsWith('/') ? path : '/' + path;
-    //         sourceUrl = `${apiBaseUrl}${cleanedPath}`; // Собираем полный URL
-    //     }
-    // }
-    
-    // 2. УСЛОВНЫЙ РЕНДЕРИНГ: Не рендерим Card.Img, если это MOCK (sourceUrl == null)
+    const path = process.image;
+    sourceUrl = String(path);
     const shouldRenderImage = !!sourceUrl;
-    
+
+    const dispatch = useDispatch<AppDispatch>();
+    const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+    const { id, loading: draftLoading } = useSelector((state: RootState) => state.draft);
+
+    const handleAdd = async () => {
+        if (!isAuthenticated) {
+            alert("Пожалуйста, войдите в систему, чтобы добавить услугу в расчет.");
+            return;
+        }
+
+        if (process.id) {
+            const resultAction = await dispatch(addProcessToDraft({
+                processId: process.id,
+                quantity: 1,
+                appId: id || null
+            }));
+
+            if (addProcessToDraft.fulfilled.match(resultAction)) {
+                const currentAppId = id || resultAction.payload.calculation;
+                if (currentAppId) {
+                    dispatch(incrementCartCount(1));
+                    await dispatch(getDraft(currentAppId));
+                }
+            } else {
+                alert(`Ошибка: ${resultAction.payload}`);
+            }
+        }
+    }
+
     return (
         <Card className="h-100 shadow-sm">
-            
+
             {shouldRenderImage && (
-                 <Card.Img 
-                    variant="top" 
-                    src={sourceUrl!} // Используем собранный абсолютный URL
-                    style={{ height: '200px', objectFit: 'cover' }} 
-                    // 3. FALLBACK: Если даже абсолютный URL не сработал (404), показываем заглушку
-                    onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => { 
-                        e.currentTarget.src = apiBaseUrl + defaultImagePath; 
+                <Card.Img
+                    variant="top"
+                    src={sourceUrl!}
+                    style={{ height: '200px', objectFit: 'cover' }}
+                    onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                        // Предполагаем, что defaultImagePath уже полный путь или относительный
+                        e.currentTarget.src = defaultImagePath;
                     }}
                 />
             )}
-            
+
             <Card.Body>
                 <Card.Title>{process.name}</Card.Title>
                 <Card.Text>
-                    <strong>Вход:</strong> {process.input_mass} кг ({process.input_reagent})<br/>
+                    <strong>Вход:</strong> {process.input_mass} кг ({process.input_reagent})<br />
                     <strong>Выход:</strong> {process.output_mass} кг
                 </Card.Text>
-                <Link to={`/processes/${process.id}`} className="btn btn-primary w-100">
-                    Подробнее
-                </Link>
+
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                    <Link to={`/processes/${process.id}`} className="btn btn-primary">
+                        Подробнее
+                    </Link>
+
+                    {/* Кнопка "Добавить" */}
+                    {(isAuthenticated == true) && (
+                        <Button
+                            className="city-btn"
+                            variant="success"
+                            onClick={handleAdd}
+                            disabled={!process.id || draftLoading}
+                        >
+                            {draftLoading ? (
+                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                            ) : (
+                                'Добавить в расчет'
+                            )}
+                        </Button>
+                    )}
+                </div>
             </Card.Body>
         </Card>
     );

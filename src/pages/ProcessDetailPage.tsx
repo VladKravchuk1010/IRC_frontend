@@ -4,7 +4,7 @@ import { Container, Row, Col, Image, Spinner, Alert, Table } from 'react-bootstr
 import { BreadCrumbs } from '../components/BreadCrumbs';
 import type { ChemicalProcess } from '../types';
 
-const API_BASE_URL = 'https://172.25.192.1:3000';
+const API_BASE_URL = 'http://localhost:3000';
 const DEFAULT_IMAGE = API_BASE_URL + '/default.png';
 
 export const ProcessDetailPage: FC = () => {
@@ -16,7 +16,7 @@ export const ProcessDetailPage: FC = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(API_BASE_URL + `/api/chemical-processes/${id}/`);
+                const response = await fetch(`/api/chemical-processes/${id}/`);
                 if (!response.ok) throw new Error('Процесс не найден');
                 const data = await response.json();
                 setProcess(data);
