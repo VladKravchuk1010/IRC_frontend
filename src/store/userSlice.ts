@@ -3,30 +3,37 @@ import { api } from '../api';
 import type { RootState } from './store';
 import type { UserLogin, UserProfile, UserRegistration } from '../api/Api';
 
-interface UserState {
-    username: string;
+interface UserState extends UserProfile {
     isAuthenticated: boolean;
     error?: string | null;
-    sessionKey: string | null;
+    loading: boolean;
 }
 
 const initialState: UserState = {
+    id: undefined,
     username: '',
+    email: '',
+    first_name: '',
+    last_name: '',
     isAuthenticated: false,
     error: null,
-    sessionKey: null,
+    loading: false,
 };
 
-export const fetchUserOnStartup = createAsyncThunk<
-    UserProfile,
-    void
->(
+interface LoginResponse {
+    username: string;
+    session_key: string;
+    message?: string;
+    user_id?: number;
+    is_staff?: boolean;
+    is_superuser?: boolean;
+}
+
+export const fetchUserOnStartup = createAsyncThunk<UserProfile, void>(
     'user/fetchUserOnStartup',
     async (_, { rejectWithValue }) => {
         const sessionKey = localStorage.getItem('session_key');
-        if (!sessionKey) {
-            return rejectWithValue('Нет ключа сессии');
-        }
+        if (!sessionKey) return rejectWithValue('Нет ключа сессии');
 
         try {
             const response = await api.user.userProfileList();
@@ -38,30 +45,25 @@ export const fetchUserOnStartup = createAsyncThunk<
     }
 );
 
-export const registerUserAsync = createAsyncThunk<
-    { message?: string; user_id?: number },
-    UserRegistration,
-    { rejectValue: string }
->(
+export const registerUserAsync = createAsyncThunk<{ message?: string; user_id?: number }, UserRegistration>(
     'user/registerUserAsync',
-    async (registrationData: UserRegistration, { rejectWithValue }) => {
+    async (registrationData, { rejectWithValue }) => {
         try {
             const response = await api.user.userRegisterCreate(registrationData);
             return response.data;
         } catch (error) {
-            let errorMessage = 'Ошибка регистрации. Проверьте введенные данные.';
-            return rejectWithValue(errorMessage);
+            return rejectWithValue('Ошибка регистрации. Проверьте данные.');
         }
     }
 );
 
 export const loginUserAsync = createAsyncThunk<
-    { username: string; session_key: string },
+    LoginResponse, // Используем расширенный тип здесь
     UserLogin,
     { rejectValue: string }
 >(
     'user/loginUserAsync',
-    async (credentials: UserLogin, { rejectWithValue }) => {
+    async (credentials, { rejectWithValue, dispatch }) => {
         try {
             const response = await api.user.userLoginCreate(credentials);
 
@@ -73,36 +75,34 @@ export const loginUserAsync = createAsyncThunk<
 
             localStorage.setItem('session_key', session_key);
 
-            return { username, session_key };
-        } catch (error) {
-            let errorMessage = 'Ошибка авторизации. Проверьте введенные данные.';
-            return rejectWithValue(errorMessage);
+            dispatch(fetchUserOnStartup());
+
+            return {
+                ...response.data,
+                session_key,
+                username
+            };
+        } catch (error: any) {
+            const message = error.response?.data?.detail || 'Ошибка авторизации.';
+            return rejectWithValue(message);
         }
     }
 );
 
-export const logoutUserAsync = createAsyncThunk<
-    void,
-    void,
-    { rejectValue: string; state: RootState }
->(
-    'user/logoutUserAsync',
-    async (_, { rejectWithValue }) => {
-        try {
-            await api.user.userLogoutCreate({});
-            return;
-        } catch (error) {
-            return rejectWithValue('Ошибка при выходе из системы.');
-        }
+export const logoutUserAsync = createAsyncThunk('user/logoutUserAsync', async () => {
+    try {
+        await api.user.userLogoutCreate({});
+    } finally {
+        localStorage.removeItem('session_key');
     }
-);
+});
 
 export const updateUserProfile = createAsyncThunk(
     'user/updateUserProfile',
     async (profileData: UserProfile, { rejectWithValue }) => {
         try {
             const response = await api.user.userProfileUpdate(profileData);
-            return response.data;
+            return response.data; // Возвращает обновленный объект профиля
         } catch (error) {
             return rejectWithValue('Ошибка при обновлении профиля');
         }
@@ -113,53 +113,42 @@ const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        clearError: (state) => {
-            state.error = null;
-        }
+        clearError: (state) => { state.error = null; }
     },
     extraReducers: (builder) => {
         builder
-            .addCase(loginUserAsync.pending, (state) => {
-                state.error = null;
-            })
-            .addCase(loginUserAsync.fulfilled, (state, action: PayloadAction<{ username: string }>) => {
-                const { username } = action.payload;
-                state.username = username;
+            .addCase(fetchUserOnStartup.fulfilled, (state, action: PayloadAction<UserProfile>) => {
                 state.isAuthenticated = true;
-                state.error = null;
+                Object.assign(state, action.payload);
             })
-            .addCase(loginUserAsync.rejected, (state, action) => {
-                state.error = action.payload as string;
+            .addCase(fetchUserOnStartup.rejected, (state) => {
                 state.isAuthenticated = false;
                 state.username = '';
             })
 
-            .addCase(logoutUserAsync.fulfilled, (state) => {
-                state.username = '';
-                state.isAuthenticated = false;
-                state.error = null;
-            })
-            .addCase(logoutUserAsync.rejected, (state, action) => {
-                state.username = '';
-                state.isAuthenticated = false;
-                state.error = action.payload as string;
-            })
-            .addCase(registerUserAsync.pending, (state) => {
-                state.error = null;
-            })
-            .addCase(registerUserAsync.fulfilled, (state, action) => {
-                state.error = 'Регистрация прошла успешно! Теперь войдите в систему.';
-            })
-            .addCase(registerUserAsync.rejected, (state, action) => {
-                state.error = action.payload as string;
-            })
-            .addCase(fetchUserOnStartup.fulfilled, (state, action) => {
+            .addCase(loginUserAsync.fulfilled, (state, action) => {
                 state.isAuthenticated = true;
-                state.username = action.payload.username as string;
+                state.username = action.payload.username;
+                state.error = null;
             })
-            .addCase(fetchUserOnStartup.rejected, (state) => {
-                state.isAuthenticated = false;
-            });
+            .addCase(loginUserAsync.rejected, (state, action) => {
+                state.error = action.payload as string;
+            })
+
+            .addCase(updateUserProfile.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(updateUserProfile.fulfilled, (state, action: PayloadAction<UserProfile>) => {
+                state.loading = false;
+                Object.assign(state, action.payload);
+                state.error = null;
+            })
+            .addCase(updateUserProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+
+            .addCase(logoutUserAsync.fulfilled, () => initialState);
     },
 });
 

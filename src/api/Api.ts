@@ -414,6 +414,8 @@ export interface UserProfile {
    * @format date-time
    */
   date_joined?: string;
+  password?: string;
+  password_confirm?: string;
 }
 
 export interface UserRegistration {
@@ -938,7 +940,7 @@ export class Api<
      * @request DELETE:/reagent_calculations/{id}/
      * @secure
      */
-    reagentCalculationsDelete: (id: string, params: RequestParams = {}) =>
+    reagentCalculationsDelete: (id: number, params: RequestParams = {}) =>
       this.request<void, void>({
         path: `/reagent_calculations/${id}/`,
         method: "DELETE",

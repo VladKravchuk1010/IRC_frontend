@@ -4,8 +4,8 @@ import type { ChemicalProcess } from '../api/Api'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../store/store';
-import { addProcessToDraft, getDraft } from '../store/draftSlice';
-import { incrementCartCount } from '../store/cartSlice';
+import { addProcessToCalculation, getDraft } from '../store/draftSlice';
+import { fetchActiveCalculationStatus, incrementCartCount } from '../store/cartSlice';
 
 
 interface Props {
@@ -26,32 +26,28 @@ export const ProcessCard: FC<Props> = ({ process, defaultImagePath }) => {
     const { id, loading: draftLoading } = useSelector((state: RootState) => state.draft);
 
     const handleAdd = async () => {
-        if (!isAuthenticated) {
-            alert("Пожалуйста, войдите в систему, чтобы добавить услугу в расчет.");
-            return;
-        }
-
         if (process.id) {
-            const resultAction = await dispatch(addProcessToDraft({
+            const resultAction = await dispatch(addProcessToCalculation({
                 processId: process.id,
                 quantity: 1,
-                appId: id || null
+                appId: id
             }));
 
-            if (addProcessToDraft.fulfilled.match(resultAction)) {
-                const currentAppId = id || resultAction.payload.calculation;
-                if (currentAppId) {
-                    dispatch(incrementCartCount(1));
-                    await dispatch(getDraft(currentAppId));
-                }
-            } else {
-                alert(`Ошибка: ${resultAction.payload}`);
+            if (addProcessToCalculation.fulfilled.match(resultAction)) {
+                dispatch(fetchActiveCalculationStatus())
+                //     const currentAppId = id || resultAction.payload.calculation;
+            //     if (currentAppId) {
+            //         dispatch(incrementCartCount(1));
+            //         await dispatch(getDraft(currentAppId));
+            //     }
+            // } else {
+            //     alert(`Ошибка: ${resultAction.payload}`);
             }
         }
     }
 
     return (
-        <Card className="h-100 shadow-sm">
+        <Card className="h-100 border-0 shadow-sm">
 
             {shouldRenderImage && (
                 <Card.Img
@@ -65,15 +61,15 @@ export const ProcessCard: FC<Props> = ({ process, defaultImagePath }) => {
                 />
             )}
 
-            <Card.Body>
+            <Card.Body className='d-flex flex-column'>
                 <Card.Title>{process.name}</Card.Title>
                 <Card.Text>
                     <strong>Вход:</strong> {process.input_mass} кг ({process.input_reagent})<br />
                     <strong>Выход:</strong> {process.output_mass} кг
                 </Card.Text>
 
-                <div className="d-flex justify-content-between align-items-center mt-3">
-                    <Link to={`/processes/${process.id}`} className="btn btn-primary">
+                <div className="d-flex justify-content-center align-items-center mt-3 mt-auto">
+                    <Link to={`/processes/${process.id}`} className="btn btn-primary" style={{ flex: 1, marginRight: '10px', height: '42px' }}>
                         Подробнее
                     </Link>
 
@@ -84,11 +80,12 @@ export const ProcessCard: FC<Props> = ({ process, defaultImagePath }) => {
                             variant="success"
                             onClick={handleAdd}
                             disabled={!process.id || draftLoading}
+                            style={{ flex: 1, height: '42px' }}
                         >
                             {draftLoading ? (
                                 <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
                             ) : (
-                                'Добавить в расчет'
+                                'Добавить'
                             )}
                         </Button>
                     )}

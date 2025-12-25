@@ -3,6 +3,7 @@ import { type ChemicalProcess } from '../api/Api';
 import { api } from '../api';
 import { MOCK_PROCESSES } from '../api/mock';
 import type { RootState } from './store';
+import { logoutUserAsync } from './userSlice';
 
 
 interface FilterState {
@@ -89,6 +90,9 @@ const filterSlice = createSlice({
                 state.processes = MOCK_PROCESSES.filter((item) =>
                     item.name.toLocaleLowerCase().startsWith(state.search.toLocaleLowerCase())
                 );
+            })
+            .addCase(logoutUserAsync.fulfilled, () => {
+                return initialState;
             });
     },
 });

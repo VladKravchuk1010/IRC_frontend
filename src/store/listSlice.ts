@@ -3,9 +3,9 @@ import { api } from '../api';
 
 export const fetchCalculations = createAsyncThunk(
     'list/fetchCalculations',
-    async (_, { rejectWithValue }) => {
+    async (filters: { status?: string; date_from?: string; date_to?: string } | undefined, { rejectWithValue }) => {
         try {
-            const response = await api.reagentCalculations.reagentCalculationsList();
+            const response = await api.reagentCalculations.reagentCalculationsList(filters);
             return response.data;
         } catch (error) {
             return rejectWithValue('Ошибка при загрузке списка заявок');

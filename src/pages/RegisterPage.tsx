@@ -1,154 +1,161 @@
-import { type FC, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Form, Button, Alert, Container, Spinner } from 'react-bootstrap';
+import { type FC, useState } from 'react';
+import { Container, Form, Button, Alert, Card, Row, Col } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from "react-router-dom";
-import { registerUserAsync } from '../store/userSlice';
+import { useNavigate, Link } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../store/store';
-import { Link } from 'react-router-dom';
-import type { UserRegistration } from '../api/Api';
+import { registerUserAsync, clearError } from '../store/userSlice';
 
 const RegisterPage: FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
+    const { error } = useSelector((state: RootState) => state.user);
 
     const [formData, setFormData] = useState({
         username: '',
+        first_name: '',
+        last_name: '',
         email: '',
-        firstName: '',
-        lastName: '',
         password: '',
-        passwordConfirm: ''
+        password_confirm: ''
     });
 
-    // Используем состояние для ошибки/успеха
-    const error = useSelector((state: RootState) => state.user.error);
-    const loading = false; // Можно добавить состояние загрузки в userSlice
+    const [validationError, setValidationError] = useState<string | null>(null);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setValidationError(null);
+        dispatch(clearError());
 
-        if (formData.password !== formData.passwordConfirm) {
-            alert('Пароли не совпадают!');
+        // Валидация на фронтенде
+        if (formData.password !== formData.password_confirm) {
+            setValidationError("Пароли не совпадают!");
             return;
         }
 
-        const registrationData = {
-            username: formData.username,
-            email: formData.email,
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            password: formData.password,
-            password_confirm: formData.passwordConfirm
-            
-        };
+        if (formData.password.length < 6) {
+            setValidationError("Пароль должен быть не менее 6 символов.");
+            return;
+        }
 
-        const resultAction = await dispatch(registerUserAsync(registrationData));
+        try {
+            // Отправляем данные (исключая password_confirm, если бэкенд его не ждет, 
+            // но обычно лучше отправлять всё, что требует UserRegistration в кодогенерации)
+            await dispatch(registerUserAsync(formData)).unwrap();
 
-        if (registerUserAsync.fulfilled.match(resultAction)) {
+            // Если регистрация успешна, перекидываем на логин через 2 секунды
+            // или сразу. Давай сразу для скорости.
             navigate('/login');
+        } catch (err) {
+            // Ошибка обработается в Redux и выведется через useSelector
         }
     };
 
     return (
-        <Container style={{ maxWidth: '450px', marginTop: '100px' }}>
-            <h2 className="text-center mb-4">Регистрация нового пользователя</h2>
+        <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
+            <Card className="shadow-lg border-0 bg-element p-4" style={{ maxWidth: '600px', width: '100%' }}>
+                <Card.Body>
+                    <h2 className="text-white text-center fw-bold mb-4">Регистрация</h2>
 
-            {error && <Alert variant={error.includes('успешно') ? 'success' : 'danger'}>{error}</Alert>}
-
-            <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="username" className="mb-3">
-                    <Form.Label>Имя пользователя</Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        placeholder="Придумайте имя пользователя"
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="email" className="mb-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="Введите Email"
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="firstName" className="mb-4">
-                    <Form.Label>Имя</Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        placeholder="Имя"
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="lastName" className="mb-4">
-                    <Form.Label>Фамилия</Form.Label>
-                    <Form.Control
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        placeholder="Фамилия"
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="password" className="mb-3">
-                    <Form.Label>Пароль</Form.Label>
-                    <Form.Control
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Введите пароль"
-                        required
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="passwordConfirm" className="mb-4">
-                    <Form.Label>Подтверждение пароля</Form.Label>
-                    <Form.Control
-                        type="password"
-                        name="passwordConfirm"
-                        value={formData.passwordConfirm}
-                        onChange={handleChange}
-                        placeholder="Повторите пароль"
-                        required
-                    />
-                </Form.Group>
-
-                <Button
-                    variant="success"
-                    type="submit"
-                    className="w-100"
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                    ) : (
-                        'Зарегистрироваться'
+                    {(error || validationError) && (
+                        <Alert variant="danger">
+                            {validationError || error}
+                        </Alert>
                     )}
-                </Button>
-            </Form>
 
-            <p className="mt-3 text-center">
-                Уже есть аккаунт? <Link to="/login">Войти</Link>
-            </p>
+                    <Form onSubmit={handleSubmit}>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-white-50">Логин</Form.Label>
+                                    <Form.Control
+                                        name="username"
+                                        required
+                                        onChange={handleChange}
+                                        placeholder="ivan_petrov"
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-white-50">Email</Form.Label>
+                                    <Form.Control
+                                        name="email"
+                                        type="email"
+                                        required
+                                        onChange={handleChange}
+                                        placeholder="example@mail.ru"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-white-50">Имя</Form.Label>
+                                    <Form.Control
+                                        name="first_name"
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-white-50">Фамилия</Form.Label>
+                                    <Form.Control
+                                        name="last_name"
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <hr className="bg-secondary my-4" />
+
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-white-50">Пароль</Form.Label>
+                                    <Form.Control
+                                        name="password"
+                                        type="password"
+                                        required
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-4">
+                                    <Form.Label className="text-white-50">Подтверждение</Form.Label>
+                                    <Form.Control
+                                        name="password_confirm"
+                                        type="password"
+                                        required
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <div className="d-grid gap-2">
+                            <Button variant="primary" type="submit" size="lg">
+                                Создать аккаунт
+                            </Button>
+                        </div>
+                    </Form>
+
+                    <div className="text-center mt-4">
+                        <span className="text-white-50">Уже есть аккаунт? </span>
+                        <Link to="/login" className="text-accent-yellow text-decoration-none">
+                            Войти
+                        </Link>
+                    </div>
+                </Card.Body>
+            </Card>
         </Container>
     );
 };

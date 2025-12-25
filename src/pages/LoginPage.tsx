@@ -1,5 +1,5 @@
 import { useEffect, useState, type FC, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Button, Form, Alert, Card, Container } from 'react-bootstrap';
 import type { RootState, AppDispatch } from '../store/store';
@@ -82,6 +82,12 @@ const LoginPage: FC = () => {
                         Войти
                     </Button>
                 </Form>
+                <div className="text-center mt-3">
+                    <span className="text-white-50">Впервые у нас? </span>
+                    <Link to="/register" className="text-accent-yellow text-decoration-none">
+                        Создать аккаунт
+                    </Link>
+                </div>
             </Card>
         </Container>
     );

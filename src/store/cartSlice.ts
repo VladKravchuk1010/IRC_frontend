@@ -3,20 +3,20 @@ import { api } from '../api';
 
 interface CartState {
     count: number;
-    calculation_id: number | null;
+    calculation_id: number;
     loading: boolean;
     error: string | null;
 }
 
 const initialState: CartState = {
     count: 0,
-    calculation_id: null,
+    calculation_id: 0,
     loading: false,
     error: null,
 };
 
-export const fetchCarticonAsync = createAsyncThunk(
-    'cart/fetchCartCount',
+export const fetchActiveCalculationStatus = createAsyncThunk(
+    'cart/fetchActiveCalculationStatus',
     async (_, { rejectWithValue }) => {
         try {
             const response = await api.reagentCalculations.reagentCalculationsCartIconList();
@@ -40,18 +40,22 @@ const cartSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchCarticonAsync.pending, (state) => {
+            .addCase(fetchActiveCalculationStatus.pending, (state) => {
                 state.loading = true;
             })
-            .addCase(fetchCarticonAsync.fulfilled, (state, action) => {
+            .addCase(fetchActiveCalculationStatus.fulfilled, (state, action) => {
                 state.loading = false;
                 state.calculation_id = action.payload.calculation_id
                 state.count = action.payload.processes_count;
             })
-            .addCase(fetchCarticonAsync.rejected, (state) => {
+            .addCase(fetchActiveCalculationStatus.rejected, (state) => {
                 state.loading = false;
                 state.count = 0;
-            });
+            })
+            // .addMatcher(
+            //     (action) => action.type.endsWith('addProcessToCalculation/fulfilled'),
+            //     (state) => {state.count += 1}
+            // )
     },
 });
 

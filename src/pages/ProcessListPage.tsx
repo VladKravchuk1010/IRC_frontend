@@ -57,13 +57,14 @@ export const ProcessListPage: FC = () => {
                 <Row className="g-3 align-items-end">
 
                     {/* Поле поиска по названию */}
-                    <Col xs={12} md={4}>
+                    <Col xs={12} md={4} variant="primary">
                         <Form.Label>Поиск по названию</Form.Label>
                         <Form.Control
                             type="text"
                             placeholder="Например, 'Аммиака'"
                             name="search"
                             value={search}
+                            style={{ color: '#FFD304' }}
                             onChange={handleFilterChange}
                         />
                     </Col>

@@ -5,8 +5,9 @@ import type {
     ChemicalProcessInCalculationDelete,
     ReagentCalculationCreate
 } from '../api/Api';
+import { logoutUserAsync } from './userSlice';
 
-interface  DraftState {
+interface DraftState {
     id: number | null;
     target_mass: string;
     safety_factor: string;
@@ -18,7 +19,7 @@ interface  DraftState {
     isDraft: boolean;
 }
 
-const initialState:  DraftState = {
+const initialState: DraftState = {
     id: null,
     target_mass: '',
     safety_factor: '',
@@ -38,12 +39,12 @@ export const getDraft = createAsyncThunk(
     }
 );
 
-export const addProcessToDraft = createAsyncThunk<
+export const addProcessToCalculation = createAsyncThunk<
     ChemicalProcessInCalculation,
     { processId: number; quantity: number; appId: number | null },
     { rejectValue: string }
 >(
-    ' Draft/addProcessToDraft',
+    ' Draft/addProcessToCalculation',
     async ({ processId }, { rejectWithValue }) => {
         try {
             const response = await api.chemicalProcesses.chemicalProcessesAddToCartCreate(processId);
@@ -54,32 +55,24 @@ export const addProcessToDraft = createAsyncThunk<
     }
 );
 
-export const deleteDraft = createAsyncThunk(
-    ' Draft/deleteDraft',
-    async (appId: number) => {
-        const response = await api.reagentCalculations.reagentCalculationsDelete(appId.toString());
-        return response.data;
-    }
-);
-
-export const updateDraft = createAsyncThunk(
-    ' Draft/updateDraft',
+export const updateReagentCalculation = createAsyncThunk(
+    ' Draft/updateReagentCalculation',
     async ({ appId, data }: { appId: number; data: ReagentCalculationCreate }) => {
         const response = await api.reagentCalculations.reagentCalculationsUpdate(appId.toString(), data);
         return response.data;
     }
 );
 
-export const deleteProcessFromDraft = createAsyncThunk(
-    ' Draft/deleteProcessFromDraft',
+export const deleteProcessFromCalculation = createAsyncThunk(
+    ' Draft/deleteProcessFromCalculation',
     async (data: ChemicalProcessInCalculationDelete) => {
         await api.calculationProcesses.calculationProcessesDeleteDelete(data);
         return data.process_id;
     }
 );
 
-export const formDraft = createAsyncThunk(
-    'Draft/formDraft',
+export const formReagentCalculation = createAsyncThunk(
+    'Draft/formReagentCalculation',
     async (appId: number, { rejectWithValue }) => {
         try {
             const response = await api.reagentCalculations.reagentCalculationsFormUpdate(appId.toString());
@@ -90,8 +83,41 @@ export const formDraft = createAsyncThunk(
     }
 );
 
-// В extraReducers для finalizeDraft.fulfilled просто вызывай resetDraft()
-// или делай navigate на список заявок, так как черновика больше нет.
+
+export const deleteEntireDraft = createAsyncThunk(
+    'draft/deleteEntireDraft',
+    async(appId: number, { dispatch }) => {
+        await api.reagentCalculations.reagentCalculationsDelete(appId);
+        dispatch(resetDraft());
+}
+);
+
+export const updateProcessQuantityAsync = createAsyncThunk<
+    { processId: number; quantity: number; calculation_result: string | null },
+    { calculationId: number; processId: number; quantity: number, calculation_result: string | null },             
+    { rejectValue: string }
+>(
+    'draft/updateProcessQuantityAsync',
+    async ({ calculationId, processId, quantity }, { rejectWithValue }) => {
+        try {
+            const updateData = {
+                calculation_id: calculationId,
+                process_id: processId,
+                quantity: quantity
+            };
+
+            const response = await api.calculationProcesses.calculationProcessesUpdate(updateData as any);
+
+            return {
+                processId,
+                quantity,
+                calculation_result: response.data?.calculation_result || null
+            };
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Ошибка обновления количества');
+        }
+    }
+);
 
 const DraftSlice = createSlice({
     name: ' Draft',
@@ -100,7 +126,7 @@ const DraftSlice = createSlice({
         setError: (state, action: PayloadAction<string | null>) => {
             state.error = action.payload;
         },
-        setDraftData: (state, action: PayloadAction<Partial< DraftState>>) => {
+        setDraftData: (state, action: PayloadAction<Partial<DraftState>>) => {
             return { ...state, ...action.payload };
         },
         setProcesses: (state, action: PayloadAction<ChemicalProcessInCalculation[]>) => {
@@ -129,13 +155,12 @@ const DraftSlice = createSlice({
                 state.loading = false;
                 state.error = action.error.message || 'Ошибка загрузки';
             })
-            .addCase(addProcessToDraft.fulfilled, (state, action) => {
+            .addCase(addProcessToCalculation.fulfilled, (state, action) => {
                 state.loading = false;
                 const newItem = action.payload;
-                
 
-                if
-                    (newItem.calculation && !state.id) {
+
+                if(newItem.calculation && !state.id) {
                     state.id = newItem.calculation;
                 }
                 const existingIndex = state.processes.findIndex(p => p.process === newItem.process);
@@ -146,35 +171,47 @@ const DraftSlice = createSlice({
                 }
                 state.count = state.processes.length;
             })
-            .addCase(deleteDraft.fulfilled, (state) => {
-                return initialState;
-            })
-            .addCase(updateDraft.fulfilled, (state, action) => {
+            .addCase(updateReagentCalculation.fulfilled, (state, action) => {
                 state.target_mass = action.payload.target_mass;
                 state.safety_factor = action.payload.safety_factor || '';
                 state.calculation_date = action.payload.calculation_date;
                 state.error = null;
             })
-            .addCase(deleteProcessFromDraft.fulfilled, (state, action) => {
+            .addCase(deleteProcessFromCalculation.fulfilled, (state, action) => {
                 state.processes = state.processes.filter(p => p.process !== action.payload);
                 state.count = state.processes.length;
             })
-            .addCase(formDraft.fulfilled, () => {
-                resetDraft()    
+            .addCase(formReagentCalculation.fulfilled, (state) => {
+                return initialState
             })
-            // .addCase(fetchActiveDraft.fulfilled, (state, action) => {
-            //     if (action.payload) {
-            //         state.id = action.payload.id ?? null;
+            .addCase(logoutUserAsync.fulfilled, () => {
+                return initialState;
+            })
+            .addCase(deleteEntireDraft.fulfilled, (state) => {
+                return initialState;
+            })
+            .addCase(updateProcessQuantityAsync.fulfilled, (state, action) => {
+                const process = state.processes.find(p => p.process === action.payload.processId);
+                if (process) {
+                    process.quantity = action.payload.quantity;
+                    process.calculation_result = action.payload.calculation_result;
+                }
+            });
 
-            //         state.target_mass = action.payload.target_mass || '';
 
-            //         const payloadData = action.payload as any;
-            //         state.processes = payloadData.processes || [];
-            //         state.count = state.processes.length;
+        // .addCase(fetchActiveDraft.fulfilled, (state, action) => {
+        //     if (action.payload) {
+        //         state.id = action.payload.id ?? null;
 
-            //         state.isDraft = action.payload.status === 'DRAFT';
-            //     }
-            // })
+        //         state.target_mass = action.payload.target_mass || '';
+
+        //         const payloadData = action.payload as any;
+        //         state.processes = payloadData.processes || [];
+        //         state.count = state.processes.length;
+
+        //         state.isDraft = action.payload.status === 'DRAFT';
+        //     }
+        // })
     },
 });
 
