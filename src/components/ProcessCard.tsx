@@ -4,8 +4,8 @@ import type { ChemicalProcess } from '../api/Api'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../store/store';
-import { addProcessToCalculation, getDraft } from '../store/draftSlice';
-import { fetchActiveCalculationStatus, incrementCartCount } from '../store/cartSlice';
+import { addProcessToCalculation} from '../store/draftSlice';
+import { fetchActiveCalculationStatus} from '../store/cartSlice';
 
 
 interface Props {
@@ -35,13 +35,6 @@ export const ProcessCard: FC<Props> = ({ process, defaultImagePath }) => {
 
             if (addProcessToCalculation.fulfilled.match(resultAction)) {
                 dispatch(fetchActiveCalculationStatus())
-                //     const currentAppId = id || resultAction.payload.calculation;
-            //     if (currentAppId) {
-            //         dispatch(incrementCartCount(1));
-            //         await dispatch(getDraft(currentAppId));
-            //     }
-            // } else {
-            //     alert(`Ошибка: ${resultAction.payload}`);
             }
         }
     }

@@ -13,16 +13,14 @@ const LoginPage: FC = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
 
-    // 1. Локальное состояние для данных входа (соответствует UserLogin)
     const [formData, setFormData] = useState<UserLogin>({
         username: '',
         password: '',
     });
 
-    // 2. Логика перенаправления (исправленная)
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/processes', { replace: true }); // Предполагаем наличие DAHBOARD
+            navigate('/processes', { replace: true });
         }
     }, [isAuthenticated, navigate]);
 
@@ -33,15 +31,12 @@ const LoginPage: FC = () => {
         });
     };
 
-    // 3. Обработчик отправки формы
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
-        // В dispatch передается объект formData, который имеет тип UserLogin
         dispatch(loginUserAsync(formData));
     };
 
-    // Если пользователь уже авторизован, ничего не рендерим, пока не выполнится редирект
     if (isAuthenticated) {
         return null;
     }

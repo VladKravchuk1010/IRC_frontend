@@ -8,7 +8,6 @@ export const ProfilePage: FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const user = useSelector((state: RootState) => state.user);
 
-    // Локальное состояние для всех полей профиля
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -16,7 +15,6 @@ export const ProfilePage: FC = () => {
         last_name: '',
     });
 
-    // Локальное состояние для паролей
     const [passwords, setPasswords] = useState({
         password: '',
         password_confirm: ''
@@ -24,7 +22,6 @@ export const ProfilePage: FC = () => {
 
     const [statusMsg, setStatusMsg] = useState<{ type: string, text: string } | null>(null);
 
-    // Подтягиваем данные из Redux при загрузке
     useEffect(() => {
         setFormData({
             username: user.username || '',
@@ -46,10 +43,8 @@ export const ProfilePage: FC = () => {
         e.preventDefault();
         setStatusMsg(null);
 
-        // Сбор данных для отправки
         const dataToSave: any = { ...formData };
 
-        // Если пользователь начал вводить пароль
         if (passwords.password || passwords.password_confirm) {
             if (passwords.password !== passwords.password_confirm) {
                 setStatusMsg({ type: 'danger', text: "Новые пароли не совпадают!" });
@@ -64,10 +59,9 @@ export const ProfilePage: FC = () => {
         }
 
         try {
-            // Используем твой thunk, который теперь умеет принимать и пароли
             await dispatch(updateUserProfile(dataToSave)).unwrap();
             setStatusMsg({ type: 'success', text: "Профиль успешно обновлен!" });
-            setPasswords({ password: '', password_confirm: '' }); // Очищаем поля пароля
+            setPasswords({ password: '', password_confirm: '' });
         } catch (err: any) {
             setStatusMsg({ type: 'danger', text: err || "Ошибка при обновлении профиля" });
         }

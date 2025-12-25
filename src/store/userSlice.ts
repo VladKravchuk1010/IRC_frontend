@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
 import { api } from '../api';
-import type { RootState } from './store';
 import type { UserLogin, UserProfile, UserRegistration } from '../api/Api';
 
 interface UserState extends UserProfile {
@@ -58,7 +57,7 @@ export const registerUserAsync = createAsyncThunk<{ message?: string; user_id?: 
 );
 
 export const loginUserAsync = createAsyncThunk<
-    LoginResponse, // Используем расширенный тип здесь
+    LoginResponse,
     UserLogin,
     { rejectValue: string }
 >(
@@ -102,7 +101,7 @@ export const updateUserProfile = createAsyncThunk(
     async (profileData: UserProfile, { rejectWithValue }) => {
         try {
             const response = await api.user.userProfileUpdate(profileData);
-            return response.data; // Возвращает обновленный объект профиля
+            return response.data;
         } catch (error) {
             return rejectWithValue('Ошибка при обновлении профиля');
         }

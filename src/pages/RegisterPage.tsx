@@ -30,7 +30,6 @@ const RegisterPage: FC = () => {
         setValidationError(null);
         dispatch(clearError());
 
-        // Валидация на фронтенде
         if (formData.password !== formData.password_confirm) {
             setValidationError("Пароли не совпадают!");
             return;
@@ -42,15 +41,10 @@ const RegisterPage: FC = () => {
         }
 
         try {
-            // Отправляем данные (исключая password_confirm, если бэкенд его не ждет, 
-            // но обычно лучше отправлять всё, что требует UserRegistration в кодогенерации)
             await dispatch(registerUserAsync(formData)).unwrap();
 
-            // Если регистрация успешна, перекидываем на логин через 2 секунды
-            // или сразу. Давай сразу для скорости.
             navigate('/login');
         } catch (err) {
-            // Ошибка обработается в Redux и выведется через useSelector
         }
     };
 

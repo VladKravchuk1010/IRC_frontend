@@ -1,4 +1,4 @@
-import { useState, useEffect, type FC } from 'react';
+import { useEffect, type FC } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate, BrowserRouter } from 'react-router-dom';
 import { Navbar, Nav, Container, Badge, Button } from 'react-bootstrap';
 
@@ -6,18 +6,17 @@ import { HomePage } from './pages/HomePage';
 import { ProcessListPage } from './pages/ProcessListPage';
 import { ProcessDetailPage } from './pages/ProcessDetailPage';
 
-import { Provider, useDispatch, useSelector } from 'react-redux';
-import { store, type AppDispatch, type RootState } from './store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { type AppDispatch, type RootState } from './store/store';
 import LoginPage from './pages/LoginPage';
-import { logoutUserAsync, fetchUserOnStartup } from './store/userSlice';
-import { getProcessesList, setFilters } from './store/filterSlice';
+import { logoutUserAsync} from './store/userSlice';
+import { setFilters } from './store/filterSlice';
 import RegisterPage from './pages/RegisterPage';
-import { api } from './api';
 import { fetchActiveCalculationStatus } from './store/cartSlice';
 import { ProfilePage } from './pages/ProfilePage';
-import DraftPage from './pages/DraftPage';
-import { getDraft, resetDraft } from './store/draftSlice';
-import { ListPage } from './pages/ListPage';
+import DraftPage from './pages/CalculationPage';
+import { resetDraft } from './store/draftSlice';
+import { ListPage } from './pages/CalculationsListPage';
 
 function AppContent() {
     const location = useLocation();
@@ -50,9 +49,7 @@ function AppContent() {
             loading: false
         }));
 
-        navigate('/processes');
-
-        dispatch(getProcessesList());
+        navigate('/');
     };
 
     return (
