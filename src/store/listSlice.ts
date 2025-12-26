@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { api } from '../api';
+import { data } from 'react-router-dom';
 
 export const fetchCalculations = createAsyncThunk(
     'list/fetchCalculations',
@@ -9,6 +10,24 @@ export const fetchCalculations = createAsyncThunk(
             return response.data;
         } catch (error) {
             return rejectWithValue('Ошибка при загрузке списка заявок');
+        }
+    }
+);
+
+export const moderateCalculation = createAsyncThunk<
+    void,
+    { id: number; action: 'complete' | 'reject' },
+    { rejectValue: string }
+>(
+    'list/moderateCalculation',
+    async ({ id, action }, { dispatch, rejectWithValue }) => {
+        try {
+            await api.reagentCalculations.reagentCalculationsCompleteUpdate(id, { action });
+
+            dispatch(fetchCalculations({}));
+
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Ошибка смены статуса');
         }
     }
 );

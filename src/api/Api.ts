@@ -957,7 +957,7 @@ export class Api<
      * @secure
      */
     reagentCalculationsCompleteUpdate: (
-      id: string,
+      id: number,
       data: {
         /** complete или reject */
         action?: string;

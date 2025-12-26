@@ -16,7 +16,7 @@ import { fetchActiveCalculationStatus } from './store/cartSlice';
 import { ProfilePage } from './pages/ProfilePage';
 import DraftPage from './pages/CalculationPage';
 import { resetDraft } from './store/draftSlice';
-import { ListPage } from './pages/CalculationsListPage';
+import { CalculationsListPage } from './pages/CalculationsListPage';
 
 function AppContent() {
     const location = useLocation();
@@ -135,7 +135,7 @@ function AppContent() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/cart/:id" element={<DraftPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/calculations" element={<ListPage />} />
+                <Route path="/calculations" element={<CalculationsListPage />} />
                 <Route path="/calculations/:id" element={<DraftPage />} />
             </Routes>
         </>

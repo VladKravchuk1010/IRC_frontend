@@ -2,7 +2,11 @@ import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/tool
 import { api } from '../api';
 import type { UserLogin, UserProfile, UserRegistration } from '../api/Api';
 
-interface UserState extends UserProfile {
+interface ExtendedUserProfile extends UserProfile {
+    is_staff?: boolean;
+}
+
+interface UserState extends ExtendedUserProfile {
     isAuthenticated: boolean;
     error?: string | null;
     loading: boolean;
@@ -27,6 +31,7 @@ interface LoginResponse {
     is_staff?: boolean;
     is_superuser?: boolean;
 }
+
 
 export const fetchUserOnStartup = createAsyncThunk<UserProfile, void>(
     'user/fetchUserOnStartup',
@@ -128,6 +133,7 @@ const userSlice = createSlice({
             .addCase(loginUserAsync.fulfilled, (state, action) => {
                 state.isAuthenticated = true;
                 state.username = action.payload.username;
+                state.is_staff = action.payload.is_staff;
                 state.error = null;
             })
             .addCase(loginUserAsync.rejected, (state, action) => {
