@@ -1,73 +1,23 @@
-# React + TypeScript + Vite
+# Industrial Reagent Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Система автоматизированного расчёта массы химических реагентов для планирования промышленных процессов. Позволяет моделировать материальный баланс с учётом целевой массы продукта, коэффициентов выхода и запаса. Система построена на микросервисной архитектуре и включает основной веб-сервис на Python/Django, выделенный асинхронный сервис для расчётов на Go и фронтенд-приложение на React.
 
-Currently, two official plugins are available:
+## Функциональные возможности
+- Расчёт материального баланса: Вычисление необходимой массы реагентов для сложных химических процессов.
+- Управление жизненным циклом заявки: Создание черновиков, управление составом услуг (M-M связи), формирование и удаление заявок.
+- Асинхронные вычисления: Перенос ресурсозатратных расчетов на отдельный высокопроизводительный сервис (Go) для обеспечения отзывчивости интерфейса.
+- Панель модератора: Инструменты верификации заявок, фильтрация по статусам и датам, подтверждение и отклонение расчетов.
+- Short Polling: Автоматическое обновление статусов и результатов в реальном времени.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Используемые технологии
+- Backend: Python, Django REST Framework, PostgreSQL, Redis
+- Асинхронный сервис: Go (Gin Framework)
+- Frontend: React, Redux Toolkit
+- SPA и Tauri приложения
+- Развёртывание: GitHub Pages
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Ссылки на проект
+- Демо (GitHub Pages): [https://VladKravchuk1010.github.io/IRC_frontend/](https://VladKravchuk1010.github.io/IRC_frontend/)  
+- Репозиторий Backend: [https://github.com/VladKravchuk1010/IRC_backend](https://github.com/VladKravchuk1010/IRC_backend)  
+- Репозиторий Frontend: [https://github.com/VladKravchuk1010/IRC_frontend](https://github.com/VladKravchuk1010/IRC_frontend)  
+- Репозиторий Асинхронного сервиса: [https://github.com/VladKravchuk1010/IRC_async_go](https://github.com/VladKravchuk1010/IRC_async_go)
