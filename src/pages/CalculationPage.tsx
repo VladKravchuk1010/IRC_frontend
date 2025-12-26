@@ -112,16 +112,38 @@ const DraftPage: FC = () => {
                     {isDraft ? 'Черновик расчета' : 'Детали расчета'}
                     <span className="text-accent-purple ms-2">№{id}</span>
                 </h2>
-                {isDraft && !isEditing && (
-                    <Button
-                        variant="success"
-                        size="lg"
-                        onClick={handleformReagentCalculation}
-                        className="px-4 shadow animate-pulse"
-                    >
-                        🚀 Сформировать заявку
-                    </Button>
-                )}
+                <div className="d-flex gap-2">
+                    {isDraft && (
+                        <>
+                            <Button
+                                variant="success"
+                                onClick={handleformReagentCalculation}
+                                className="shadow-sm"
+                            >
+                                🚀 Сформировать
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleSave}
+                                className="shadow-sm"
+                            >
+                                💾 Сохранить
+                            </Button>
+                            <Button
+                                variant="danger"
+                                onClick={handleDeleteEntireDraft}
+                                className="shadow-sm"
+                            >
+                                🗑️ Удалить заявку
+                            </Button>
+                        </>
+                    )}
+                    {!isDraft && (
+                        <Button variant="outline-secondary" onClick={() => navigate('/reagent_calculations')}>
+                            ← К списку
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {loading && <div className="text-center my-4"><Spinner animation="border" /></div>}
@@ -135,7 +157,7 @@ const DraftPage: FC = () => {
                                 <Form.Control
                                     type="number"
                                     value={target_mass}
-                                    disabled={!isEditing}
+                                    disabled={!isDraft}
                                     onChange={(e) => dispatch(setDraftData({ target_mass: e.target.value }))}
                                 />
                             </Form.Group>
@@ -146,7 +168,7 @@ const DraftPage: FC = () => {
                                 <Form.Control
                                     type="number"
                                     value={safety_factor}
-                                    disabled={!isEditing}
+                                    disabled={!isDraft}
                                     onChange={(e) => dispatch(setDraftData({ safety_factor: e.target.value }))}
                                 />
                             </Form.Group>
@@ -164,47 +186,12 @@ const DraftPage: FC = () => {
                         processName={item.process_name}
                         count={item.quantity}
                         result={item.calculation_result}
-                        isEditing={isDraft && isEditing}
+                        isDraft={isDraft}
                         onRemove={handleRemoveProcess}
                         onQuantityChange={handleQuantityChange}
                         imageClickHandler={() => navigate(`/processes/${item.process}`)}
                     />
                 ))}
-            </div>
-
-            <div className="d-flex justify-content-end gap-3 border-top pt-4">
-                {!isDraft ? (
-                    <Button variant="outline-secondary" onClick={() => navigate('/calculations')}>
-                        ← Назад к списку
-                    </Button>
-                ) : (
-                    !isEditing ? (
-                        <Button
-                            variant="outline-primary"
-                            className="px-4"
-                            onClick={() => setIsEditing(true)}
-                        >
-                            ⚙️ Редактировать
-                        </Button>
-                    ) : (
-                        <>
-                            <Button
-                                variant="danger"
-                                className="px-4"
-                                onClick={handleDeleteEntireDraft}
-                            >
-                                🗑️ Удалить всю заявку
-                            </Button>
-                            <Button
-                                variant="success"
-                                className="px-5 shadow-sm"
-                                onClick={handleSave}
-                            >
-                                💾 Сохранить
-                            </Button>
-                        </>
-                    )
-                )}
             </div>
         </Container>
     );

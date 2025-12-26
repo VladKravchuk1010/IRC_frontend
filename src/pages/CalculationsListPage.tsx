@@ -135,7 +135,7 @@ export const CalculationsListPage: FC = () => {
                                                 <Button variant="outline-danger" size="sm" className="me-2" onClick={() => handleAction(item.id, 'reject')}>❌</Button>
                                             </>
                                         )}
-                                        <Link to={`/calculations/${item.id}`} className="btn btn-sm btn-info rounded-pill px-3">
+                                        <Link to={`/reagent_calculations/${item.id}`} className="btn btn-sm btn-info rounded-pill px-3">
                                             🔍 Детали
                                         </Link>
                                     </td>

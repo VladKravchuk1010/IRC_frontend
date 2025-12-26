@@ -64,7 +64,7 @@ function AppContent() {
                             <Nav.Link as={Link} to="/">Главная</Nav.Link>
                             <Nav.Link as={Link} to="/processes">Список процессов</Nav.Link>
                             {isAuthenticated && (
-                                <Nav.Link as={Link} to="/calculations">Мои заявки</Nav.Link>
+                                <Nav.Link as={Link} to="/reagent_calculations">Мои заявки</Nav.Link>
                             )}
                         </Nav>
 
@@ -102,7 +102,7 @@ function AppContent() {
                     style={{ top: '75px', zIndex: 1000, pointerEvents: 'none' }}
                 >
                     <Link
-                        to={draftId ? `/cart/${draftId}` : "#"}
+                        to={draftId ? `/reagent_calculations/${draftId}` : "#"}
                         className={`btn d-flex align-items-center shadow ${draftId
                             ? 'btn-outline-warning bg-dark' // Желтая рамка на темном фоне
                             : 'btn-outline-secondary disabled'
@@ -133,10 +133,9 @@ function AppContent() {
                 <Route path="/processes/:id" element={<ProcessDetailPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/cart/:id" element={<DraftPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/calculations" element={<CalculationsListPage />} />
-                <Route path="/calculations/:id" element={<DraftPage />} />
+                <Route path="/reagent_calculations" element={<CalculationsListPage />} />
+                <Route path="/reagent_calculations/:id" element={<DraftPage />} />
             </Routes>
         </>
     );
